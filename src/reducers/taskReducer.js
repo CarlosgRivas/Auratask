@@ -146,6 +146,32 @@ export const taskReducer = (state, action) => {
             return newState;
         }
 
+        case 'RESTORE_TASK':
+            return state.map(task =>
+                task.id === action.payload
+                    ? {
+                        ...task,
+                        remainingTime: task.initialTime,
+                        isRunning: false,
+                        lastTickAt: null,
+                        finishedAt: null
+                    }
+                    : task
+            );
+
+        case 'RESTORE_ALL_TASKS':
+            return state.map(task =>
+                (task.remainingTime <= 0 || task.finishedAt)
+                    ? {
+                        ...task,
+                        remainingTime: task.initialTime,
+                        isRunning: false,
+                        lastTickAt: null,
+                        finishedAt: null
+                    }
+                    : task
+            );
+
         default:
             return state;
     }

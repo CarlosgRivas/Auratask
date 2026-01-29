@@ -13,7 +13,7 @@ const formatTime = (ms) => {
     return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
 };
 
-export function TaskItem({ task, dispatch, index, totalCount }) {
+export function TaskItem({ task, dispatch, index, totalCount, isCompleted = false }) {
     const [isEditingTitle, setIsEditingTitle] = useState(false);
     const [isEditingTime, setIsEditingTime] = useState(false); // For remaining time manual edit
 
@@ -32,7 +32,7 @@ export function TaskItem({ task, dispatch, index, totalCount }) {
 
     // Remaining Time Editor Logic
     const startEditingRemaining = () => {
-        if (task.isRunning) return; // Don't edit while running
+        if (task.isRunning || isCompleted) return; // Don't edit while running or completed
         const totalSeconds = Math.ceil(task.remainingTime / 1000);
         const h = Math.floor(totalSeconds / 3600);
         const m = Math.floor((totalSeconds % 3600) / 60);
@@ -51,9 +51,9 @@ export function TaskItem({ task, dispatch, index, totalCount }) {
     const initialM = Math.floor((task.initialTime % (3600 * 1000)) / (60 * 1000));
 
     return (
-        <div className={`task-card ${task.isRunning ? 'active' : ''}`}>
+        <div className={`task-card ${task.isRunning ? 'active' : ''} ${isCompleted ? 'completed' : ''}`}>
             <div className="task-header">
-                {isEditingTitle ? (
+                {isEditingTitle && !isCompleted ? (
                     <input
                         className="task-input"
                         value={task.title}
@@ -62,50 +62,70 @@ export function TaskItem({ task, dispatch, index, totalCount }) {
                         autoFocus
                     />
                 ) : (
-                    <span className="task-input" onClick={() => setIsEditingTitle(true)}>{task.title}</span>
+                    <span
+                        className="task-title"
+                        onClick={() => !isCompleted && setIsEditingTitle(true)}
+                        style={{ textDecoration: isCompleted ? 'line-through' : 'none', cursor: isCompleted ? 'default' : 'pointer' }}
+                    >
+                        {task.title}
+                    </span>
                 )}
 
                 <div className="controls">
-                    <button
-                        className="btn-icon"
-                        onClick={() => dispatch({ type: 'TOGGLE_TIMER', payload: task.id })}
-                        title={task.isRunning ? "Pausar" : "Iniciar"}
-                    >
-                        {task.isRunning ? (
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>
-                        ) : (
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
-                        )}
-                    </button>
+                    {!isCompleted ? (
+                        <>
+                            <button
+                                className="btn-icon"
+                                onClick={() => dispatch({ type: 'TOGGLE_TIMER', payload: task.id })}
+                                title={task.isRunning ? "Pausar" : "Iniciar"}
+                            >
+                                {task.isRunning ? (
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>
+                                ) : (
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                                )}
+                            </button>
 
-                    <button
-                        className="btn-icon"
-                        onClick={() => dispatch({ type: 'RESET_TIMER', payload: task.id })}
-                        title="Reiniciar"
-                    >
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path></svg>
-                    </button>
+                            <button
+                                className="btn-icon"
+                                onClick={() => dispatch({ type: 'RESET_TIMER', payload: task.id })}
+                                title="Reiniciar"
+                            >
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path></svg>
+                            </button>
+                        </>
+                    ) : (
+                        <button
+                            className="btn-icon"
+                            onClick={() => dispatch({ type: 'RESTORE_TASK', payload: task.id })}
+                            title="Restaurar tarea"
+                        >
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="1 4 1 10 7 10"></polyline><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path></svg>
+                        </button>
+                    )}
 
-                    <div className="reorder-controls" style={{ display: 'flex', flexDirection: 'column', marginRight: 8 }}>
-                        <button
-                            className="btn-icon small"
-                            disabled={index === 0}
-                            onClick={() => dispatch({ type: 'MOVE_TASK', payload: { fromIndex: index, toIndex: index - 1 } })}
-                            title="Subir"
-                            style={{ opacity: index === 0 ? 0.3 : 1, padding: 0, height: 16 }}
-                        >
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="18 15 12 9 6 15"></polyline></svg>
-                        </button>
-                        <button
-                            className="btn-icon small"
-                            disabled={index >= totalCount - 1}
-                            onClick={() => dispatch({ type: 'MOVE_TASK', payload: { fromIndex: index, toIndex: index + 1 } })}
-                            title="Bajar"
-                            style={{ opacity: index >= totalCount - 1 ? 0.3 : 1, padding: 0, height: 16 }}
-                        >
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
-                        </button>
-                    </div>
+                    {!isCompleted && (
+                        <div className="reorder-controls" style={{ display: 'flex', flexDirection: 'column', marginRight: 8 }}>
+                            <button
+                                className="btn-icon small"
+                                disabled={index === 0}
+                                onClick={() => dispatch({ type: 'MOVE_TASK', payload: { fromIndex: index, toIndex: index - 1 } })}
+                                title="Subir"
+                                style={{ opacity: index === 0 ? 0.3 : 1, padding: 0, height: 16 }}
+                            >
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="18 15 12 9 6 15"></polyline></svg>
+                            </button>
+                            <button
+                                className="btn-icon small"
+                                disabled={index >= totalCount - 1}
+                                onClick={() => dispatch({ type: 'MOVE_TASK', payload: { fromIndex: index, toIndex: index + 1 } })}
+                                title="Bajar"
+                                style={{ opacity: index >= totalCount - 1 ? 0.3 : 1, padding: 0, height: 16 }}
+                            >
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                            </button>
+                        </div>
+                    )}
 
                     <button
                         className="btn-icon"
@@ -135,24 +155,26 @@ export function TaskItem({ task, dispatch, index, totalCount }) {
                     <div
                         className="timer-display"
                         onClick={startEditingRemaining}
-                        style={{ cursor: task.isRunning ? 'default' : 'pointer', textDecoration: task.isRunning ? 'none' : 'underline', textDecorationStyle: 'dotted' }}
+                        style={{ cursor: (!task.isRunning && !isCompleted) ? 'pointer' : 'default', textDecoration: (!task.isRunning && !isCompleted) ? 'underline' : 'none', textDecorationStyle: 'dotted', opacity: isCompleted ? 0.6 : 1 }}
                         title={task.isRunning ? "Pausa para editar" : "Click para editar tiempo restante"}
                     >
                         {formatTime(task.remainingTime)}
                     </div>
                 )}
 
-                <div className="time-editor">
+                <div className="time-editor" style={{ opacity: isCompleted ? 0.5 : 1 }}>
                     <span>Total:</span>
                     <input
                         className="time-input"
                         type="number"
+                        disabled={isCompleted}
                         defaultValue={initialH}
                         onBlur={(e) => handleInitialTimeEdit(parseInt(e.target.value), initialM)}
                     /> h
                     <input
                         className="time-input"
                         type="number"
+                        disabled={isCompleted}
                         defaultValue={initialM}
                         onBlur={(e) => handleInitialTimeEdit(initialH, parseInt(e.target.value))}
                     /> m
@@ -160,7 +182,7 @@ export function TaskItem({ task, dispatch, index, totalCount }) {
             </div>
 
             <div className="progress-bar-bg">
-                <div className="progress-bar-fill" style={{ width: `${progress}%` }}></div>
+                <div className="progress-bar-fill" style={{ width: `${progress}%`, backgroundColor: isCompleted ? 'var(--success-color)' : undefined }}></div>
             </div>
         </div>
     );
