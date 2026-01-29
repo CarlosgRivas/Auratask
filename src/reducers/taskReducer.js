@@ -137,6 +137,15 @@ export const taskReducer = (state, action) => {
                 lastTickAt: null
             }));
 
+        case 'MOVE_TASK': {
+            const { fromIndex, toIndex } = action.payload;
+            if (toIndex < 0 || toIndex >= state.length) return state;
+            const newState = [...state];
+            const [movedItem] = newState.splice(fromIndex, 1);
+            newState.splice(toIndex, 0, movedItem);
+            return newState;
+        }
+
         default:
             return state;
     }

@@ -16,8 +16,14 @@ export function TaskList({ tasks, dispatch }) {
 
     return (
         <div className="task-list">
-            {tasks.map(task => (
-                <TaskItem key={task.id} task={task} dispatch={dispatch} />
+            {tasks.map((task, index) => (
+                <TaskItem
+                    key={task.id}
+                    task={task}
+                    index={index}
+                    totalCount={tasks.length}
+                    dispatch={dispatch}
+                />
             ))}
         </div>
     );
