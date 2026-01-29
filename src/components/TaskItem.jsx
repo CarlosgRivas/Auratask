@@ -13,7 +13,7 @@ const formatTime = (ms) => {
     return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
 };
 
-export function TaskItem({ task, dispatch, index, totalCount, isCompleted = false }) {
+export function TaskItem({ task, dispatch, index, totalCount, isCompleted = false, onDragStart, onDrop }) {
     const [isEditingTitle, setIsEditingTitle] = useState(false);
     const [isEditingTime, setIsEditingTime] = useState(false); // For remaining time manual edit
 
@@ -50,8 +50,34 @@ export function TaskItem({ task, dispatch, index, totalCount, isCompleted = fals
     const initialH = Math.floor(task.initialTime / (3600 * 1000));
     const initialM = Math.floor((task.initialTime % (3600 * 1000)) / (60 * 1000));
 
+    const handleDragStart = (e) => {
+        if (!onDragStart || isCompleted) return;
+        onDragStart(index);
+        e.dataTransfer.effectAllowed = 'move';
+        // Optional: set drag image
+    };
+
+    const handleDragOver = (e) => {
+        if (!onDrop || isCompleted) return;
+        e.preventDefault(); // Necessary to allow dropping
+        e.dataTransfer.dropEffect = 'move';
+    };
+
+    const handleDrop = (e) => {
+        if (!onDrop || isCompleted) return;
+        e.preventDefault();
+        onDrop(index);
+    };
+
     return (
-        <div className={`task-card ${task.isRunning ? 'active' : ''} ${isCompleted ? 'completed' : ''}`}>
+        <div
+            className={`task-card ${task.isRunning ? 'active' : ''} ${isCompleted ? 'completed' : ''}`}
+            draggable={!isCompleted && !isEditingTitle && !isEditingTime}
+            onDragStart={handleDragStart}
+            onDragOver={handleDragOver}
+            onDrop={handleDrop}
+            style={{ cursor: (!isCompleted && !isEditingTitle && !isEditingTime) ? 'move' : 'default' }}
+        >
             <div className="task-header">
                 {isEditingTitle && !isCompleted ? (
                     <input
