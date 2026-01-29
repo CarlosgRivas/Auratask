@@ -13,7 +13,7 @@ const formatTime = (ms) => {
     return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
 };
 
-export function TaskItem({ task, dispatch, index, totalCount, isCompleted = false, onDragStart, onDrop }) {
+export function TaskItem({ task, dispatch, index, totalCount, isCompleted = false, isSkipped = false, onDragStart, onDrop }) {
     const [isEditingTitle, setIsEditingTitle] = useState(false);
     const [isEditingTime, setIsEditingTime] = useState(false); // For remaining time manual edit
 
@@ -119,12 +119,24 @@ export function TaskItem({ task, dispatch, index, totalCount, isCompleted = fals
                             >
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path></svg>
                             </button>
+
+                            <button
+                                className="btn-icon"
+                                onClick={() => dispatch({ type: 'SKIP_TASK', payload: task.id })}
+                                title="Saltar (Mover a omitidas)"
+                                style={{ marginLeft: 4 }}
+                            >
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M13 17l5-5-5-5M6 17l5-5-5-5" /></svg>
+                            </button>
                         </>
                     ) : (
                         <button
                             className="btn-icon"
-                            onClick={() => dispatch({ type: 'RESTORE_TASK', payload: task.id })}
-                            title="Restaurar tarea"
+                            onClick={() => dispatch({
+                                type: isSkipped ? 'RESTORE_SKIPPED_TASK' : 'RESTORE_TASK',
+                                payload: task.id
+                            })}
+                            title={isSkipped ? "Restaurar a pendientes" : "Restaurar tarea"}
                         >
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="1 4 1 10 7 10"></polyline><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path></svg>
                         </button>
