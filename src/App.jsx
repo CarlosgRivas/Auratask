@@ -3,6 +3,7 @@ import { RoutineManager } from './components/RoutineManager';
 import { taskReducer } from './reducers/taskReducer';
 import { TaskList } from './components/TaskList';
 import { AddTask } from './components/AddTask';
+import { TaskStats } from './components/TaskStats';
 import { requestNotificationPermission, sendNotification } from './utils/notifications';
 import { playAlarm } from './utils/audio';
 
@@ -104,6 +105,7 @@ function App() {
       </header>
 
       <main>
+        <TaskStats tasks={tasks} />
         <AddTask onAdd={handleAddTask} />
         <TaskList tasks={tasks} dispatch={dispatch} />
       </main>
