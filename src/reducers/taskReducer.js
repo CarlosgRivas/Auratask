@@ -172,6 +172,30 @@ export const taskReducer = (state, action) => {
                     : task
             );
 
+        case 'SKIP_TASK':
+            return state.map(task =>
+                task.id === action.payload
+                    ? {
+                        ...task,
+                        isRunning: false,
+                        lastTickAt: null,
+                        isSkipped: true,
+                        skippedAt: Date.now()
+                    }
+                    : task
+            );
+
+        case 'RESTORE_SKIPPED_TASK':
+            return state.map(task =>
+                task.id === action.payload
+                    ? {
+                        ...task,
+                        isSkipped: false,
+                        skippedAt: null
+                    }
+                    : task
+            );
+
         default:
             return state;
     }

@@ -28,11 +28,16 @@ const init = () => {
 function App() {
   const [tasks, dispatch] = useReducer(taskReducer, [], init);
   const [showRoutines, setShowRoutines] = useState(false);
+  const [endTime, setEndTime] = useState(() => localStorage.getItem('aura-end-time') || '');
 
   // Persistence
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
   }, [tasks]);
+
+  useEffect(() => {
+    localStorage.setItem('aura-end-time', endTime);
+  }, [endTime]);
 
   // Global Ticker
   useEffect(() => {
@@ -105,7 +110,7 @@ function App() {
       </header>
 
       <main>
-        <TaskStats tasks={tasks} />
+        <TaskStats tasks={tasks} endTime={endTime} setEndTime={setEndTime} />
         <AddTask onAdd={handleAddTask} />
         <TaskList tasks={tasks} dispatch={dispatch} />
       </main>
