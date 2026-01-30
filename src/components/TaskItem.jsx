@@ -20,6 +20,7 @@ export function TaskItem({ task, dispatch, index, totalCount, isCompleted = fals
 
     const [editH, setEditH] = useState(0);
     const [editM, setEditM] = useState(0);
+    const [showFeedback, setShowFeedback] = useState(false);
 
     const progress = Math.min(100, Math.max(0, (task.remainingTime / task.initialTime) * 100));
 
@@ -59,6 +60,10 @@ export function TaskItem({ task, dispatch, index, totalCount, isCompleted = fals
             // Short task: set timer for end
             setAndroidTimer(remainingSeconds, `🏁 Finish: ${task.title}`);
         }
+
+        // Show feedback
+        setShowFeedback(true);
+        setTimeout(() => setShowFeedback(false), 2000);
     };
 
     const initialH = Math.floor(task.initialTime / (3600 * 1000));
@@ -127,14 +132,21 @@ export function TaskItem({ task, dispatch, index, totalCount, isCompleted = fals
                             </button>
 
                             {task.isRunning && (
-                                <button
-                                    className="btn-icon btn-android-timer"
-                                    onClick={handleSetAndroidTimer}
-                                    title="Sincronizar con Reloj Android"
-                                    style={{ color: '#b388ff' }} // Purple accent
-                                >
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-                                </button>
+                                <div style={{ position: 'relative' }}>
+                                    <button
+                                        className="btn-icon btn-android-timer"
+                                        onClick={handleSetAndroidTimer}
+                                        title="Sincronizar con Reloj Android"
+                                        style={{ color: '#b388ff' }} // Purple accent
+                                    >
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                                    </button>
+                                    {showFeedback && (
+                                        <span className="timer-feedback-toast">
+                                            ✅ Enviado
+                                        </span>
+                                    )}
+                                </div>
                             )}
 
                             <button

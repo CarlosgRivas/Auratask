@@ -40,7 +40,7 @@ export const taskReducer = (state, action) => {
                     : task
             );
 
-        case 'SYNC_TIMERS':
+        case 'SYNC_TIMERS': {
             // Called on valid ticks or init to update running timers
             const now = Date.now();
             return state.map(task => {
@@ -68,6 +68,7 @@ export const taskReducer = (state, action) => {
                 }
                 return task;
             });
+        }
 
         case 'TOGGLE_TIMER': {
             const nowTime = Date.now();
@@ -101,6 +102,7 @@ export const taskReducer = (state, action) => {
                 return newState;
             }
         }
+
 
         case 'MOVE_TASK': {
             const { fromId, toId } = action.payload;

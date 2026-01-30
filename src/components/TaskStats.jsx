@@ -20,7 +20,7 @@ export function TaskStats({ tasks, endTime, setEndTime, startTime, setStartTime 
     const completedCount = completedTasks.length;
     const pendingCount = pendingTasks.length;
 
-    const totalTimeSpent = tasks.reduce((acc, t) => acc + (t.initialTime - t.remainingTime), 0);
+
     const totalTimeRemaining = pendingTasks.reduce((acc, t) => acc + t.remainingTime, 0);
 
     // Schedule Logic
