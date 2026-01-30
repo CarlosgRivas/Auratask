@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { setAndroidTimer } from '../utils/android';
 
 const formatTime = (ms) => {
     if (ms <= 0) return "00:00";
@@ -45,6 +46,19 @@ export function TaskItem({ task, dispatch, index, totalCount, isCompleted = fals
         const totalMs = (parseInt(editH) * 60 * 60 * 1000) + (parseInt(editM) * 60 * 1000);
         dispatch({ type: 'UPDATE_REMAINING_TIME', payload: { id: task.id, newUsageMs: totalMs } });
         setIsEditingTime(false);
+    };
+
+    const handleSetAndroidTimer = () => {
+        const remainingSeconds = Math.ceil(task.remainingTime / 1000);
+        const WARNING_OFFSET = 600; // 10 minutes in seconds
+
+        if (remainingSeconds > WARNING_OFFSET) {
+            // Long task: set timer for 10 mins before end
+            setAndroidTimer(remainingSeconds - WARNING_OFFSET, `⚠️ 10m Left: ${task.title}`);
+        } else {
+            // Short task: set timer for end
+            setAndroidTimer(remainingSeconds, `🏁 Finish: ${task.title}`);
+        }
     };
 
     const initialH = Math.floor(task.initialTime / (3600 * 1000));
@@ -111,6 +125,17 @@ export function TaskItem({ task, dispatch, index, totalCount, isCompleted = fals
                                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
                                 )}
                             </button>
+
+                            {task.isRunning && (
+                                <button
+                                    className="btn-icon btn-android-timer"
+                                    onClick={handleSetAndroidTimer}
+                                    title="Sincronizar con Reloj Android"
+                                    style={{ color: '#b388ff' }} // Purple accent
+                                >
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                                </button>
+                            )}
 
                             <button
                                 className="btn-icon"
