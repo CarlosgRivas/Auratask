@@ -1,28 +1,31 @@
-export const setAndroidTimer = (seconds, message) => {
-    // Intent structure:
-    // intent:#Intent;
-    // scheme=android-app; (or no scheme, just action)
-    // action=android.intent.action.SET_TIMER;
-    // i.length=SECONDS;
-    // S.message=MESSAGE;
-    // B.skipUi=true; (optional, tries to skip UI confirmation)
-    // end;
+// Keys for AlarmClock:
+const ACTION = 'android.intent.action.SET_TIMER';
+const EXTRA_LENGTH = 'android.intent.extra.alarm.LENGTH';
+const EXTRA_MESSAGE = 'android.intent.extra.alarm.MESSAGE';
+const EXTRA_SKIP_UI = 'android.intent.extra.alarm.SKIP_UI';
 
-    // Correct Keys for AlarmClock.ACTION_SET_TIMER:
-    // android.intent.extra.alarm.LENGTH (int)
-    // android.intent.extra.alarm.MESSAGE (String)
-    // android.intent.extra.alarm.SKIP_UI (boolean)
+// Construct the Intent URI
+// We remove skipUi for broad compatibility as strict permission checks might block it from web context.
+// Scheme: intent:#Intent;action=...;type=...;i.ExKey=intVal;S.ExKey=strVal;end
 
-    // URI encoding:
-    // i.KEY=VALUE (integer)
-    // S.KEY=VALUE (string)
-    // B.KEY=VALUE (boolean)
+// Note: No 'scheme' defined for SET_TIMER usually, it's action-based. 
+// We add a specific package 'com.google.android.deskclock' ONLY as a comment reference, 
+// we stick to generic action for compatibility (Samsung/Xiaomi clocks).
 
-    const intentUri = `intent:#Intent;action=android.intent.action.SET_TIMER;i.android.intent.extra.alarm.LENGTH=${seconds};S.android.intent.extra.alarm.MESSAGE=${encodeURIComponent(message)};B.android.intent.extra.alarm.SKIP_UI=true;end`;
+let intentUri = `intent:#Intent;action=${ACTION};`;
+intentUri += `i.${EXTRA_LENGTH}=${seconds};`;
+intentUri += `S.${EXTRA_MESSAGE}=${encodeURIComponent(message)};`;
+intentUri += `end`;
 
-    // Try standard assignment. Hidden link click sometimes fails in recent Android webviews if not direct user tap.
-    // But since this is called from an onClick handler, window.location might be more robust.
-    window.location.href = intentUri;
+// Method 1: Anchor click (often safer for SPAs to avoid unloading checks)
+const link = document.createElement('a');
+link.href = intentUri;
+link.style.display = 'none';
+document.body.appendChild(link);
+link.click();
+setTimeout(() => {
+    document.body.removeChild(link);
+}, 100);
 
-    console.log(`Triggered Android Timer (v2): ${seconds}s - "${message}"`);
+console.log(`Triggered Android Timer (v3): ${seconds}s`);
 };
