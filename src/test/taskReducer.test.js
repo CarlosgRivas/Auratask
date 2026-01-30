@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { taskReducer } from '../reducers/taskReducer';
 
 describe('taskReducer', () => {
@@ -14,13 +14,29 @@ describe('taskReducer', () => {
         expect(newState[0].isRunning).toBe(false);
     });
 
-    it('should toggle timer start', () => {
-        const task = { id: 1, remainingTime: 1000, isRunning: false };
-        const state = [task];
-        const newState = taskReducer(state, { type: 'TOGGLE_TIMER', payload: 1 });
+    it('should toggle timer start and move to top', () => {
+        const t1 = { id: 1, title: 'T1', remainingTime: 1000, isRunning: false };
+        const t2 = { id: 2, title: 'T2', remainingTime: 1000, isRunning: false };
+        const state = [t1, t2];
+        const newState = taskReducer(state, { type: 'TOGGLE_TIMER', payload: 2 });
 
+        expect(newState[0].id).toBe(2);
         expect(newState[0].isRunning).toBe(true);
-        expect(newState[0].lastTickAt).toBeDefined();
+        expect(newState[1].id).toBe(1);
+    });
+
+    it('should move task using IDs', () => {
+        const t1 = { id: 'a' };
+        const t2 = { id: 'b' };
+        const t3 = { id: 'c' };
+        const state = [t1, t2, t3];
+
+        // Move 'c' to 'a' (bottom to top)
+        const newState = taskReducer(state, { type: 'MOVE_TASK', payload: { fromId: 'c', toId: 'a' } });
+
+        expect(newState[0].id).toBe('c');
+        expect(newState[1].id).toBe('a');
+        expect(newState[2].id).toBe('b');
     });
 
     it('should sync timer correctly', () => {

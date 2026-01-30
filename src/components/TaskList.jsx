@@ -2,20 +2,20 @@ import React from 'react';
 import { TaskItem } from './TaskItem';
 
 export function TaskList({ tasks, dispatch }) {
-    const [draggedIndex, setDraggedIndex] = React.useState(null);
+    const [draggedId, setDraggedId] = React.useState(null);
 
     const pendingTasks = tasks.filter(t => !t.finishedAt && t.remainingTime > 0 && !t.isSkipped);
     const completedTasks = tasks.filter(t => t.finishedAt || t.remainingTime <= 0);
     const skippedTasks = tasks.filter(t => t.isSkipped);
 
-    const handleDragStart = (index) => {
-        setDraggedIndex(index);
+    const handleDragStart = (id) => {
+        setDraggedId(id);
     };
 
-    const handleDrop = (dropIndex) => {
-        if (draggedIndex === null || draggedIndex === dropIndex) return;
-        dispatch({ type: 'MOVE_TASK', payload: { fromIndex: draggedIndex, toIndex: dropIndex } });
-        setDraggedIndex(null);
+    const handleDrop = (dropId) => {
+        if (draggedId === null || draggedId === dropId) return;
+        dispatch({ type: 'MOVE_TASK', payload: { fromId: draggedId, toId: dropId } });
+        setDraggedId(null);
     };
 
     if (tasks.length === 0) {
@@ -51,6 +51,8 @@ export function TaskList({ tasks, dispatch }) {
                             dispatch={dispatch}
                             onDragStart={handleDragStart}
                             onDrop={handleDrop}
+                            prevTaskId={index > 0 ? pendingTasks[index - 1].id : null}
+                            nextTaskId={index < pendingTasks.length - 1 ? pendingTasks[index + 1].id : null}
                         />
                     ))
                 )}

@@ -69,77 +69,46 @@ export const taskReducer = (state, action) => {
                 return task;
             });
 
-        case 'TOGGLE_TIMER':
+        case 'TOGGLE_TIMER': {
             const nowTime = Date.now();
-            return state.map(task => {
-                if (task.id === action.payload) {
-                    if (task.isRunning) {
-                        // Pause
-                        return {
-                            ...task,
-                            isRunning: false,
-                            lastTickAt: null
-                        };
-                    } else {
-                        // Start
-                        if (task.remainingTime <= 0) return task; // Cannot start finished task without reset
-                        return {
-                            ...task,
-                            isRunning: true,
-                            lastTickAt: nowTime
-                        };
-                    }
-                }
-                return task;
-            });
+            const taskIndex = state.findIndex(t => t.id === action.payload);
+            if (taskIndex === -1) return state;
 
-        case 'SET_INITIAL_TIME':
-            return state.map(task => {
-                if (task.id === action.payload.id) {
-                    const newTime = action.payload.totalMs;
-                    return {
-                        ...task,
-                        initialTime: newTime,
-                        remainingTime: newTime, // Reset progress on edit
-                        isRunning: false,
-                        lastTickAt: null
-                    };
-                }
-                return task;
-            });
+            const task = state[taskIndex];
 
-        case 'UPDATE_REMAINING_TIME':
-            return state.map(task => {
-                if (task.id === action.payload.id) {
-                    const newRemaining = Math.max(0, Math.min(task.initialTime, action.payload.newUsageMs));
-                    return {
-                        ...task,
-                        remainingTime: newRemaining,
-                        // Stop if running? Maybe not, just adjust current time.
-                        // But valid tick calculation needs lastTickAt reset or adjustment?
-                        // Simple way: if running, we just update remainingTime, next tick will subtract delta from there.
-                        // BUT lastTickAt is in the past. If we set remainingTime to X, next tick will do X - (now - lastTickAt).
-                        // To avoid "instantly losing the time passed since last tick", we should probably reset lastTickAt to now if running.
-                        lastTickAt: task.isRunning ? Date.now() : null
-                    };
-                }
-                return task;
-            });
+            if (task.isRunning) {
+                // Pause
+                return state.map(t => t.id === action.payload ? {
+                    ...t,
+                    isRunning: false,
+                    lastTickAt: null
+                } : t);
+            } else {
+                // Start
+                if (task.remainingTime <= 0) return state; // Cannot start finished task
 
-        case 'IMPORT_TASKS':
-            // Payload is a list of tasks (template). We need to create new IDs and reset state.
-            return action.payload.map(t => ({
-                id: crypto.randomUUID(),
-                title: t.title,
-                initialTime: t.initialTime,
-                remainingTime: t.initialTime,
-                isRunning: false,
-                lastTickAt: null
-            }));
+                // Move to top and start
+                const newState = [...state];
+                const [taskToMove] = newState.splice(taskIndex, 1);
+
+                const updatedTask = {
+                    ...taskToMove,
+                    isRunning: true,
+                    lastTickAt: nowTime
+                };
+
+                newState.unshift(updatedTask);
+                return newState;
+            }
+        }
 
         case 'MOVE_TASK': {
-            const { fromIndex, toIndex } = action.payload;
-            if (toIndex < 0 || toIndex >= state.length) return state;
+            const { fromId, toId } = action.payload;
+            const fromIndex = state.findIndex(t => t.id === fromId);
+            const toIndex = state.findIndex(t => t.id === toId);
+
+            if (fromIndex === -1 || toIndex === -1 || fromIndex === toIndex) return state;
+
             const newState = [...state];
             const [movedItem] = newState.splice(fromIndex, 1);
             newState.splice(toIndex, 0, movedItem);

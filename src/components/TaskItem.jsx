@@ -13,7 +13,7 @@ const formatTime = (ms) => {
     return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
 };
 
-export function TaskItem({ task, dispatch, index, totalCount, isCompleted = false, isSkipped = false, onDragStart, onDrop }) {
+export function TaskItem({ task, dispatch, index, totalCount, isCompleted = false, isSkipped = false, onDragStart, onDrop, prevTaskId, nextTaskId }) {
     const [isEditingTitle, setIsEditingTitle] = useState(false);
     const [isEditingTime, setIsEditingTime] = useState(false); // For remaining time manual edit
 
@@ -52,7 +52,7 @@ export function TaskItem({ task, dispatch, index, totalCount, isCompleted = fals
 
     const handleDragStart = (e) => {
         if (!onDragStart || isCompleted) return;
-        onDragStart(index);
+        onDragStart(task.id);
         e.dataTransfer.effectAllowed = 'move';
         // Optional: set drag image
     };
@@ -66,7 +66,7 @@ export function TaskItem({ task, dispatch, index, totalCount, isCompleted = fals
     const handleDrop = (e) => {
         if (!onDrop || isCompleted) return;
         e.preventDefault();
-        onDrop(index);
+        onDrop(task.id);
     };
 
     return (
@@ -147,7 +147,7 @@ export function TaskItem({ task, dispatch, index, totalCount, isCompleted = fals
                             <button
                                 className="btn-icon small"
                                 disabled={index === 0}
-                                onClick={() => dispatch({ type: 'MOVE_TASK', payload: { fromIndex: index, toIndex: index - 1 } })}
+                                onClick={() => dispatch({ type: 'MOVE_TASK', payload: { fromId: task.id, toId: prevTaskId } })}
                                 title="Subir"
                                 style={{ opacity: index === 0 ? 0.3 : 1, padding: 0, height: 16 }}
                             >
@@ -156,7 +156,7 @@ export function TaskItem({ task, dispatch, index, totalCount, isCompleted = fals
                             <button
                                 className="btn-icon small"
                                 disabled={index >= totalCount - 1}
-                                onClick={() => dispatch({ type: 'MOVE_TASK', payload: { fromIndex: index, toIndex: index + 1 } })}
+                                onClick={() => dispatch({ type: 'MOVE_TASK', payload: { fromId: task.id, toId: nextTaskId } })}
                                 title="Bajar"
                                 style={{ opacity: index >= totalCount - 1 ? 0.3 : 1, padding: 0, height: 16 }}
                             >
