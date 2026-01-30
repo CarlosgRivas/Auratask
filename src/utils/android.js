@@ -8,17 +8,21 @@ export const setAndroidTimer = (seconds, message) => {
     // B.skipUi=true; (optional, tries to skip UI confirmation)
     // end;
 
-    // We use the 'intent:' scheme which is standard for invoking intents from Chrome on Android.
-    const intentUri = `intent:#Intent;action=android.intent.action.SET_TIMER;i.length=${seconds};S.message=${encodeURIComponent(message)};B.skipUi=true;end`;
+    // Correct Keys for AlarmClock.ACTION_SET_TIMER:
+    // android.intent.extra.alarm.LENGTH (int)
+    // android.intent.extra.alarm.MESSAGE (String)
+    // android.intent.extra.alarm.SKIP_UI (boolean)
 
-    // Create a temporary link and click it
-    // This is safer than window.location.href for some pop-up blockers, though window.location usually works too for intents.
-    const link = document.createElement('a');
-    link.href = intentUri;
-    link.style.display = 'none';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    // URI encoding:
+    // i.KEY=VALUE (integer)
+    // S.KEY=VALUE (string)
+    // B.KEY=VALUE (boolean)
 
-    console.log(`Triggered Android Timer: ${seconds}s - "${message}"`);
+    const intentUri = `intent:#Intent;action=android.intent.action.SET_TIMER;i.android.intent.extra.alarm.LENGTH=${seconds};S.android.intent.extra.alarm.MESSAGE=${encodeURIComponent(message)};B.android.intent.extra.alarm.SKIP_UI=true;end`;
+
+    // Try standard assignment. Hidden link click sometimes fails in recent Android webviews if not direct user tap.
+    // But since this is called from an onClick handler, window.location might be more robust.
+    window.location.href = intentUri;
+
+    console.log(`Triggered Android Timer (v2): ${seconds}s - "${message}"`);
 };
