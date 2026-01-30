@@ -1,33 +1,35 @@
 // Keys for AlarmClock:
-const ACTION = 'android.intent.action.SET_TIMER';
-const EXTRA_LENGTH = 'android.intent.extra.alarm.LENGTH';
+// We switched from SET_TIMER to SET_ALARM for better compatibility (v1.0.2)
+const ACTION = 'android.intent.action.SET_ALARM';
+const EXTRA_HOUR = 'android.intent.extra.alarm.HOUR';
+const EXTRA_MINUTES = 'android.intent.extra.alarm.MINUTES';
 const EXTRA_MESSAGE = 'android.intent.extra.alarm.MESSAGE';
-// FLAG_ACTIVITY_NEW_TASK = 0x10000000 (268435456 in decimal)
-const FLAG_NEW_TASK = '0x10000000';
 const EXTRA_SKIP_UI = 'android.intent.extra.alarm.SKIP_UI';
 
+// FLAG_ACTIVITY_NEW_TASK = 0x10000000 (268435456 in decimal)
+const FLAG_NEW_TASK = '0x10000000';
+
 export const setAndroidTimer = (seconds, message) => {
+    // Calculate target time for the alarm
+    const now = new Date();
+    const targetTime = new Date(now.getTime() + (seconds * 1000));
+    const hour = targetTime.getHours();
+    const minutes = targetTime.getMinutes();
+
     // Construct the Intent URI
-    // We remove skipUi for broad compatibility as strict permission checks might block it from web context.
-    // Scheme: intent:#Intent;action=...;type=...;i.ExKey=intVal;S.ExKey=strVal;end
-
-    // Note: No 'scheme' defined for SET_TIMER usually, it's action-based. 
-    // We add a specific package 'com.google.android.deskclock' ONLY as a comment reference, 
-    // we stick to generic action for compatibility (Samsung/Xiaomi clocks).
-    // Modified to include launchFlags to help Chrome escape to native app.
-
-    let intentUri = `intent:#Intent;action=${ACTION};`;
-    intentUri += `launchFlags=${FLAG_NEW_TASK};`;
-    intentUri += `i.${EXTRA_LENGTH}=${seconds};`;
+    let intentUri = `intent:#Intent;action=${ACTION};launchFlags=${FLAG_NEW_TASK};`;
+    intentUri += `i.${EXTRA_HOUR}=${hour};`;
+    intentUri += `i.${EXTRA_MINUTES}=${minutes};`;
     intentUri += `S.${EXTRA_MESSAGE}=${encodeURIComponent(message)};`;
+    intentUri += `B.${EXTRA_SKIP_UI}=true;`; // Try to skip UI config and just set it
     intentUri += `end`;
 
-    // Feedback: Vibrate to confirm click (helping user know something happened)
+    // Feedback: Vibrate to confirm click
     if (navigator.vibrate) {
         try { navigator.vibrate(200); } catch (e) { /* ignore */ }
     }
 
-    // Method 2: Direct navigation (Standard for Chrome Android Intents)
-    console.log(`Triggering Android Timer (v5 - Flags): ${seconds}s`);
+    // Direct navigation
+    console.log(`Triggering Android Alarm (v1.0.2): ${hour}:${minutes} (${seconds}s)`);
     window.location.href = intentUri;
 };
