@@ -1,4 +1,5 @@
 import React, { useReducer, useEffect, useState } from 'react';
+import { version } from '../package.json';
 import { RoutineManager } from './components/RoutineManager';
 import { taskReducer } from './reducers/taskReducer';
 import { TaskList } from './components/TaskList';
@@ -102,8 +103,12 @@ function App() {
 
   return (
     <>
+
       <header style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', position: 'relative' }}>
-        <h1>AuraTask</h1>
+        <div style={{ textAlign: 'center' }}>
+          <h1 style={{ margin: 0 }}>AuraTask</h1>
+          <small style={{ opacity: 0.7 }}>v{version}</small>
+        </div>
         <button
           className="btn-icon"
           style={{ position: 'absolute', right: 0 }}
