@@ -18,15 +18,7 @@ export const setAndroidTimer = (seconds, message) => {
     intentUri += `S.${EXTRA_MESSAGE}=${encodeURIComponent(message)};`;
     intentUri += `end`;
 
-    // Method 1: Anchor click (often safer for SPAs to avoid unloading checks)
-    const link = document.createElement('a');
-    link.href = intentUri;
-    link.style.display = 'none';
-    document.body.appendChild(link);
-    link.click();
-    setTimeout(() => {
-        document.body.removeChild(link);
-    }, 100);
-
-    console.log(`Triggered Android Timer (v3): ${seconds}s`);
+    // Method 2: Direct navigation (Standard for Chrome Android Intents)
+    console.log(`Triggering Android Timer (v4) via location.href: ${seconds}s`);
+    window.location.href = intentUri;
 };
