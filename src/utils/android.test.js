@@ -28,8 +28,8 @@ describe('setAndroidTimer', () => {
 
         setAndroidTimer(seconds, message);
 
-        // Expected URI
-        const expectedUri = `intent:#Intent;action=android.intent.action.SET_TIMER;i.android.intent.extra.alarm.LENGTH=${seconds};S.android.intent.extra.alarm.MESSAGE=${encodeURIComponent(message)};end`;
+        // Expected URI with launchFlags
+        const expectedUri = `intent:#Intent;action=android.intent.action.SET_TIMER;launchFlags=0x10000000;i.android.intent.extra.alarm.LENGTH=${seconds};S.android.intent.extra.alarm.MESSAGE=${encodeURIComponent(message)};end`;
 
         expect(window.location.href).toBe(expectedUri);
     });
