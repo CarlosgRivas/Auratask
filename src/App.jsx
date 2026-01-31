@@ -15,7 +15,7 @@ const init = () => {
     try {
       const parsed = JSON.parse(saved);
       // Correction for running tasks when reloading logic could be here,
-      // but Reducer SYNC_TIMERS handles it on first tick.
+      // but Reducer SYNC_TIMERS handles it on first tick.....
       return parsed;
     } catch (e) {
       console.error(e);
