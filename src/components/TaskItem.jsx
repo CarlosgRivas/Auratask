@@ -181,10 +181,26 @@ export function TaskItem({ task, dispatch, index, totalCount, isCompleted = fals
                     <div className="time-editor glass-panel" style={{ padding: '5px' }}>
                         <input
                             type="number" value={editH} onChange={e => setEditH(e.target.value)}
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter') {
+                                    const totalMs = (parseInt(editH) * 60 * 60 * 1000) + (parseInt(editM) * 60 * 1000);
+                                    if (totalMs < task.remainingTime) {
+                                        saveRemainingTime();
+                                    }
+                                }
+                            }}
                             className="time-input" style={{ width: 30 }}
                         /> h :
                         <input
                             type="number" value={editM} onChange={e => setEditM(e.target.value)}
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter') {
+                                    const totalMs = (parseInt(editH) * 60 * 60 * 1000) + (parseInt(editM) * 60 * 1000);
+                                    if (totalMs < task.remainingTime) {
+                                        saveRemainingTime();
+                                    }
+                                }
+                            }}
                             className="time-input" style={{ width: 30 }}
                         /> m
                         <button onClick={saveRemainingTime} className="btn-primary" style={{ padding: '2px 8px', marginLeft: 5, fontSize: '0.8rem' }}>OK</button>
