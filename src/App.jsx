@@ -1,4 +1,5 @@
 import React, { useReducer, useEffect, useState } from 'react';
+import pkg from '../package.json';
 import { RoutineManager } from './components/RoutineManager';
 import { taskReducer } from './reducers/taskReducer';
 import { TaskList } from './components/TaskList';
@@ -133,6 +134,18 @@ function App() {
           onClose={() => setShowRoutines(false)}
         />
       )}
+
+      <div style={{
+        position: 'fixed',
+        bottom: 5,
+        right: 10,
+        fontSize: '0.7rem',
+        opacity: 0.3,
+        pointerEvents: 'none',
+        color: 'var(--text-muted)'
+      }}>
+        v{pkg.version}
+      </div>
     </>
   );
 }

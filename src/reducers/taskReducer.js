@@ -154,6 +154,33 @@ export const taskReducer = (state, action) => {
                     : task
             );
 
+        case 'SET_INITIAL_TIME':
+            return state.map(task =>
+                task.id === action.payload.id
+                    ? { ...task, initialTime: action.payload.totalMs }
+                    : task
+            );
+
+        case 'UPDATE_REMAINING_TIME':
+            return state.map(task =>
+                task.id === action.payload.id
+                    ? { ...task, remainingTime: action.payload.newUsageMs }
+                    : task
+            );
+
+        case 'IMPORT_TASKS':
+            return action.payload.map(t => ({
+                id: crypto.randomUUID(),
+                title: t.title,
+                initialTime: t.initialTime,
+                remainingTime: t.initialTime,
+                isRunning: false,
+                lastTickAt: null,
+                isSkipped: false,
+                skippedAt: null,
+                finishedAt: null
+            }));
+
         case 'RESTORE_SKIPPED_TASK':
             return state.map(task =>
                 task.id === action.payload
