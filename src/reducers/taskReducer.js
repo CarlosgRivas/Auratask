@@ -1,4 +1,7 @@
-export const taskReducer = (state, action) => {
+import { recalculateTaskTimes } from '../utils/timeUtils';
+
+const baseTaskReducer = (state, action) => {
+
     switch (action.type) {
         case 'ADD_TASK': {
             const totalMs = (action.payload.totalMs)
@@ -195,4 +198,9 @@ export const taskReducer = (state, action) => {
         default:
             return state;
     }
+};
+
+export const taskReducer = (state, action) => {
+    const newState = baseTaskReducer(state, action);
+    return recalculateTaskTimes(newState);
 };

@@ -7,6 +7,7 @@ import { AddTask } from './components/AddTask';
 import { TaskStats } from './components/TaskStats';
 import { requestNotificationPermission, sendNotification } from './utils/notifications';
 import { playAlarm } from './utils/audio';
+import { recalculateTaskTimes } from './utils/timeUtils';
 
 const STORAGE_KEY = 'aura-tasks-v1';
 
@@ -17,7 +18,7 @@ const init = () => {
       const parsed = JSON.parse(saved);
       // Correction for running tasks when reloading logic could be here,
       // but Reducer SYNC_TIMERS handles it on first tick.....
-      return parsed;
+      return recalculateTaskTimes(parsed);
     } catch (e) {
       console.error(e);
       return [];

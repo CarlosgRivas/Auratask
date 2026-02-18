@@ -228,6 +228,19 @@ export function TaskItem({ task, dispatch, index, totalCount, isCompleted = fals
                     </div>
                 )}
 
+                {task.calculatedStartTime && !isCompleted && (
+                    <div className="schedule-display" style={{
+                        fontSize: '0.8rem',
+                        color: 'var(--text-secondary)',
+                        fontFamily: 'monospace',
+                        fontWeight: 500,
+                        margin: '0 8px',
+                        whiteSpace: 'nowrap'
+                    }}>
+                        {task.calculatedStartTime} - {task.calculatedEndTime}
+                    </div>
+                )}
+
                 <div className="time-editor" style={{ opacity: isCompleted ? 0.5 : 1 }}>
                     <span>Total:</span>
                     <input
