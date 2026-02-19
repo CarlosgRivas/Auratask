@@ -98,8 +98,19 @@ function App() {
     requestNotificationPermission();
   };
 
-  const handleImport = (templateTasks) => {
-    dispatch({ type: 'IMPORT_TASKS', payload: templateTasks });
+  const handleImport = (routine) => {
+    // Legacy support: if routine is just an array, it's the old format (just tasks)
+    const newTasks = Array.isArray(routine) ? routine : routine.tasks;
+
+    dispatch({ type: 'IMPORT_TASKS', payload: newTasks });
+
+    // Time Configuration Support
+    // If routine object has time config, load it. 
+    // If missing (legacy routine), keep current app state.
+    if (!Array.isArray(routine)) {
+      if (routine.startTime !== undefined) setStartTime(routine.startTime);
+      if (routine.endTime !== undefined) setEndTime(routine.endTime);
+    }
   };
 
   return (
@@ -133,6 +144,8 @@ function App() {
           currentTasks={tasks}
           onImport={handleImport}
           onClose={() => setShowRoutines(false)}
+          startTime={startTime}
+          endTime={endTime}
         />
       )}
 
