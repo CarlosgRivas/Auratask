@@ -158,11 +158,17 @@ const baseTaskReducer = (state, action) => {
             );
 
         case 'SET_INITIAL_TIME':
-            return state.map(task =>
-                task.id === action.payload.id
-                    ? { ...task, initialTime: action.payload.totalMs }
-                    : task
-            );
+            return state.map(task => {
+                if (task.id === action.payload.id) {
+                    const delta = action.payload.totalMs - task.initialTime;
+                    return {
+                        ...task,
+                        initialTime: action.payload.totalMs,
+                        remainingTime: Math.max(0, task.remainingTime + delta)
+                    };
+                }
+                return task;
+            });
 
         case 'UPDATE_REMAINING_TIME':
             return state.map(task =>
