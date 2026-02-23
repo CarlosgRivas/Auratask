@@ -221,7 +221,7 @@ export function TaskItem({ task, dispatch, index, totalCount, isCompleted = fals
                     <div
                         className="timer-display"
                         onClick={startEditingRemaining}
-                        style={{ cursor: (!task.isRunning && !isCompleted) ? 'pointer' : 'default', textDecoration: (!task.isRunning && !isCompleted) ? 'underline' : 'none', textDecorationStyle: 'dotted', opacity: isCompleted ? 0.6 : 1 }}
+                        style={{ cursor: (!task.isRunning && !isCompleted) ? 'pointer' : 'default', textDecorationLine: (!task.isRunning && !isCompleted) ? 'underline' : 'none', textDecorationStyle: 'dotted', opacity: isCompleted ? 0.6 : 1 }}
                         title={task.isRunning ? "Pausa para editar" : "Click para editar tiempo restante"}
                     >
                         {formatTime(task.remainingTime)}

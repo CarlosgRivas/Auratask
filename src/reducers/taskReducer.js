@@ -1,4 +1,3 @@
-import { recalculateTaskTimes } from '../utils/timeUtils';
 
 const baseTaskReducer = (state, action) => {
 
@@ -207,6 +206,5 @@ const baseTaskReducer = (state, action) => {
 };
 
 export const taskReducer = (state, action) => {
-    const newState = baseTaskReducer(state, action);
-    return recalculateTaskTimes(newState);
+    return baseTaskReducer(state, action);
 };

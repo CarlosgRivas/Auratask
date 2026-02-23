@@ -16,9 +16,7 @@ const init = () => {
   if (saved) {
     try {
       const parsed = JSON.parse(saved);
-      // Correction for running tasks when reloading logic could be here,
-      // but Reducer SYNC_TIMERS handles it on first tick.....
-      return recalculateTaskTimes(parsed);
+      return parsed; // We calculate times in render now
     } catch (e) {
       console.error(e);
       return [];
@@ -32,6 +30,7 @@ function App() {
   const [showRoutines, setShowRoutines] = useState(false);
   const [endTime, setEndTime] = useState(() => localStorage.getItem('aura-end-time') || '');
   const [startTime, setStartTime] = useState(() => localStorage.getItem('aura-start-time') || '');
+  const [now, setNow] = useState(Date.now());
 
   // Persistence
   useEffect(() => {
@@ -49,16 +48,13 @@ function App() {
   // Global Ticker
   useEffect(() => {
     const interval = setInterval(() => {
-      // Check if any task is running before dispatching to avoid useless renders?
-      // But we need to check if any task finished too.
-      // We can just dispatch Sync. The reducer returns same state if no changes?
-      // Actually my reducer always maps. Optimization: only dispatch if some task is running.
+      setNow(Date.now());
 
       const hasRunning = tasks.some(t => t.isRunning);
       if (hasRunning) {
         dispatch({ type: 'SYNC_TIMERS' });
       }
-    }, 200);
+    }, 1000);
 
     return () => clearInterval(interval);
   }, [tasks]);
@@ -113,6 +109,20 @@ function App() {
     }
   };
 
+  // Derived state: calculate times for all tasks
+  const tasksWithTimes = React.useMemo(() => {
+    let baseStart = now;
+    if (startTime) {
+      const [h, m] = startTime.split(':').map(Number);
+      const target = new Date(now);
+      target.setHours(h, m, 0, 0);
+      if (target.getTime() > now) {
+        baseStart = target.getTime();
+      }
+    }
+    return recalculateTaskTimes(tasks, baseStart);
+  }, [tasks, startTime, now]);
+
   return (
     <>
       <header style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', position: 'relative' }}>
@@ -129,14 +139,14 @@ function App() {
 
       <main>
         <TaskStats
-          tasks={tasks}
+          tasks={tasksWithTimes}
           endTime={endTime}
           setEndTime={setEndTime}
           startTime={startTime}
           setStartTime={setStartTime}
         />
         <AddTask onAdd={handleAddTask} />
-        <TaskList tasks={tasks} dispatch={dispatch} />
+        <TaskList tasks={tasksWithTimes} dispatch={dispatch} />
       </main>
 
       {showRoutines && (
