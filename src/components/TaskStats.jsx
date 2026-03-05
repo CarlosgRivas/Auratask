@@ -11,7 +11,7 @@ const formatTime = (ms) => {
     return `${m}m`;
 };
 
-export function TaskStats({ tasks, endTime, setEndTime, startTime, setStartTime }) {
+export function TaskStats({ tasks, endTime, setEndTime, startTime, setStartTime, timeMode, setTimeMode }) {
     const [showScheduleModal, setShowScheduleModal] = useState(false);
 
     const completedTasks = tasks.filter(t => t.finishedAt || t.remainingTime <= 0);
@@ -40,7 +40,14 @@ export function TaskStats({ tasks, endTime, setEndTime, startTime, setStartTime 
             startTarget.setHours(startH, startM, 0, 0);
         }
 
-        const effectiveStart = (startTarget > now) ? startTarget : now;
+        // Apply Time Mode logic to Stats calculation too
+        let effectiveStart;
+        if (timeMode === 'routine' && startTime) {
+            effectiveStart = startTarget;
+        } else {
+            effectiveStart = (startTarget > now) ? startTarget : now;
+        }
+
         const availableMs = targetEnd - effectiveStart;
 
         if (availableMs > 0) {
@@ -77,7 +84,14 @@ export function TaskStats({ tasks, endTime, setEndTime, startTime, setStartTime 
             const [startH, startM] = startTime.split(':').map(Number);
             startTarget.setHours(startH, startM, 0, 0);
         }
-        const effectiveStart = (startTarget > now) ? startTarget : now;
+
+        let effectiveStart;
+        if (timeMode === 'routine' && startTime) {
+            effectiveStart = startTarget;
+        } else {
+            effectiveStart = (startTarget > now) ? startTarget : now;
+        }
+
         const ms = targetEnd - effectiveStart;
         availableTimeDisplay = ms > 0 ? formatTime(ms) : "0m";
     }
@@ -121,7 +135,7 @@ export function TaskStats({ tasks, endTime, setEndTime, startTime, setStartTime 
                 paddingTop: '1rem',
                 marginTop: '0.5rem'
             }}>
-                <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
                     <button
                         className="btn-secondary"
                         onClick={() => setShowScheduleModal(true)}
@@ -132,6 +146,25 @@ export function TaskStats({ tasks, endTime, setEndTime, startTime, setStartTime 
                             `${startTime || '--:--'} - ${endTime || '--:--'}` :
                             "Configurar Horario"
                         }
+                    </button>
+
+                    <button
+                        className={`btn-icon ${timeMode === 'routine' ? 'active' : ''}`}
+                        onClick={() => setTimeMode(timeMode === 'now' ? 'routine' : 'now')}
+                        title={timeMode === 'now' ? "Modo: Desde Ahora" : "Modo: Desde Inicio Rutina"}
+                        style={{
+                            background: timeMode === 'routine' ? 'var(--primary-color)' : 'rgba(255,255,255,0.05)',
+                            padding: '6px 10px',
+                            fontSize: '0.8rem',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '4px',
+                            width: 'auto',
+                            border: '1px solid var(--border-color)',
+                            color: timeMode === 'routine' ? 'white' : 'inherit'
+                        }}
+                    >
+                        {timeMode === 'now' ? '🕒 Ahora' : '📅 Rutina'}
                     </button>
                 </div>
 

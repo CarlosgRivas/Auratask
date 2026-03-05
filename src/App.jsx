@@ -31,6 +31,7 @@ function App() {
   const [endTime, setEndTime] = useState(() => localStorage.getItem('aura-end-time') || '');
   const [startTime, setStartTime] = useState(() => localStorage.getItem('aura-start-time') || '');
   const [now, setNow] = useState(Date.now());
+  const [timeMode, setTimeMode] = useState(() => localStorage.getItem('aura-time-mode') || 'now');
 
   // Persistence
   useEffect(() => {
@@ -44,6 +45,10 @@ function App() {
   useEffect(() => {
     localStorage.setItem('aura-start-time', startTime);
   }, [startTime]);
+
+  useEffect(() => {
+    localStorage.setItem('aura-time-mode', timeMode);
+  }, [timeMode]);
 
   // Global Ticker
   useEffect(() => {
@@ -116,12 +121,18 @@ function App() {
       const [h, m] = startTime.split(':').map(Number);
       const target = new Date(now);
       target.setHours(h, m, 0, 0);
-      if (target.getTime() > now) {
+
+      if (timeMode === 'routine') {
         baseStart = target.getTime();
+      } else {
+        // 'now' mode: only start from future startTime
+        if (target.getTime() > now) {
+          baseStart = target.getTime();
+        }
       }
     }
     return recalculateTaskTimes(tasks, baseStart);
-  }, [tasks, startTime, now]);
+  }, [tasks, startTime, now, timeMode]);
 
   return (
     <>
@@ -144,6 +155,8 @@ function App() {
           setEndTime={setEndTime}
           startTime={startTime}
           setStartTime={setStartTime}
+          timeMode={timeMode}
+          setTimeMode={setTimeMode}
         />
         <AddTask onAdd={handleAddTask} />
         <TaskList tasks={tasksWithTimes} dispatch={dispatch} />
